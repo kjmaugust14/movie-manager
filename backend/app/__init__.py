@@ -21,9 +21,11 @@ def create_app():
             r"/api/*": {
                 "origins": [
                     "http://localhost:5500",
-                    "http://127.0.0.1:5500"
+                    "http://127.0.0.1:5500",
                     "https://movie-manager-ashy.vercel.app"
-                ]
+                ],
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"]
             }
         }
     )
