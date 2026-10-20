@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Movie Manager — Dashboard</title>
+
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">🎬</div>
+
+        <div>
+          <h1>Movie Manager</h1>
+          <p>Personal Movie Library</p>
+        </div>
+      </div>
+
+      <div class="user-area">
+        <span id="welcomeUser"> Welcome </span>
+
+        <button id="logoutButton" class="btn btn-outline">Logout</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="hero">
+        <div>
+          <span class="eyebrow"> YOUR COLLECTION </span>
+
+          <h2>Discover your movies.</h2>
+
+          <p>Search, organize, update and manage your movie library.</p>
+        </div>
+
+        <button id="addMovieButton" class="btn btn-primary">+ Add Movie</button>
+      </section>
+
+      <!-- STATISTICS -->
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-icon">🎞️</div>
+
+          <div>
+            <span>Total Movies</span>
+            <strong id="totalMovies"> 0 </strong>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon">⭐</div>
+
+          <div>
+            <span>Average Rating</span>
+            <strong id="averageRating"> 0.0 </strong>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon">🎭</div>
+
+          <div>
+            <span>Genres</span>
+            <strong id="totalGenres"> 0 </strong>
+          </div>
+        </article>
+      </section>
+
+      <!-- CONTROLS -->
+
+      <section class="controls">
+        <div class="search-wrapper">
+          <span class="search-icon"> 🔎 </span>
+
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Search movies or directors..."
+          />
+        </div>
+
+        <select id="genreFilter">
+          <option value="">All Genres</option>
+        </select>
+      </section>
+
+      <!-- MOVIE LIST -->
+
+      <section>
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow"> LIBRARY </span>
+
+            <h3>Your Movies</h3>
+          </div>
+
+          <span id="movieCount"> 0 movies </span>
+        </div>
+
+        <div id="loadingState" class="state">
+          <div class="spinner"></div>
+
+          <p>Loading your movies...</p>
+        </div>
+
+        <div id="errorState" class="state error-state hidden">
+          <div class="state-icon">⚠️</div>
+
+          <h3>Something went wrong</h3>
+
+          <p id="errorMessage">Unable to load movies.</p>
+
+          <button id="retryButton" class="btn btn-primary">Try Again</button>
+        </div>
+
+        <div id="emptyState" class="state hidden">
+          <div class="state-icon">🎬</div>
+
+          <h3>No movies found</h3>
+
+          <p>Add your first movie to start building your collection.</p>
+        </div>
+
+        <div id="movieGrid" class="movie-grid"></div>
+      </section>
+    </main>
+
+    <!-- MOVIE MODAL -->
+
+    <div id="movieModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <span class="eyebrow"> MOVIE </span>
+
+            <h2 id="modalTitle">Add Movie</h2>
+          </div>
+
+          <button id="closeModalButton" class="modal-close">×</button>
+        </div>
+
+        <form id="movieForm">
+          <input type="hidden" id="movieId" />
+
+          <div class="form-group">
+            <label for="title"> Title </label>
+
+            <input
+              type="text"
+              id="title"
+              placeholder="e.g. Inception"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="year"> Year </label>
+
+              <input
+                type="number"
+                id="year"
+                min="1888"
+                max="2100"
+                placeholder="2010"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="rating"> Rating </label>
+
+              <input
+                type="number"
+                id="rating"
+                min="0"
+                max="10"
+                step="0.1"
+                placeholder="8.5"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="genre"> Genre </label>
+
+            <input type="text" id="genre" placeholder="e.g. Sci-Fi" required />
+          </div>
+
+          <div class="form-group">
+            <label for="director"> Director </label>
+
+            <input
+              type="text"
+              id="director"
+              placeholder="e.g. Christopher Nolan"
+              required
+            />
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" id="cancelButton" class="btn btn-outline">
+              Cancel
+            </button>
+
+            <button type="submit" class="btn btn-primary" id="saveMovieButton">
+              Save Movie
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+
+    <div id="toast" class="toast"></div>
+
+    <script src="./js/api.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/app.js"></script>
+  </body>
+</html>
