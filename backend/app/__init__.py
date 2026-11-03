@@ -1,17 +1,27 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_cors import CORS
-
 from config import Config
 
 db = SQLAlchemy()
-
+migrate = Migrate()
 
 def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
+    app = Flask(__name__, instance_relative_config=True)
+
+    os.makedirs(app.instance_path, exist_ok=True)
+    
+    app.config.from_object("config.Config")
+
+    upload_folder = app.config["UPLOAD_FOLDER"]
+    os.makedirs(os.path.join(upload_folder, "posters"), exist_ok=True)
+    os.makedirs(os.path.join(upload_folder, "trailers"), exist_ok=True)
 
     db.init_app(app)
+
+    migrate.init_app(app, db)
 
     # Allow the separate frontend to communicate
     # with the Flask API.
@@ -30,10 +40,11 @@ def create_app():
         }
     )
 
+    from app import models #noqa: F401
     from app.routes import api
     app.register_blueprint(api)
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     return app

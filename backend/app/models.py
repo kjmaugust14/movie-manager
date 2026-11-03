@@ -42,6 +42,9 @@ class User(db.Model):
 
 
 class Movie(db.Model):
+
+    __tablename__ = "movies"
+    
     id = db.Column(
         db.Integer,
         primary_key=True
@@ -72,6 +75,10 @@ class Movie(db.Model):
         nullable=False
     )
 
+    poster_filename = db.Column(db.String(255), nullable=True)
+
+    trailer_filename = db.Column(db.String(255), nullable=True)
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
@@ -85,5 +92,7 @@ class Movie(db.Model):
             "genre": self.genre,
             "director": self.director,
             "rating": self.rating,
+            "poster_filename": self.poster_filename,
+            "trailer_filename": self.trailer_filename,          
             "created_at": self.created_at.isoformat()
         }

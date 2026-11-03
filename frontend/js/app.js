@@ -163,75 +163,100 @@ CREATE MOVIE CARD
 */
 
 function createMovieCard(movie) {
-  const card = document.createElement("article");
+    const card = document.createElement("article");
+    card.className = "movie-card";
 
-  card.className = "movie-card";
+    const rating = Number(movie.rating).toFixed(1);
 
-  const rating = Number(movie.rating).toFixed(1);
+    // Check if a poster filename exists and build its URL using your uploadUrl helper
+    const posterHtml = movie.poster_filename
+        ? `<img src="${uploadUrl(movie.poster_filename)}" alt="${escapeHTML(movie.title)} Poster" />`
+        : `<div class="poster-fallback-icon">🎬</div>`;
 
-  card.innerHTML = `
-        <div class="movie-poster">
-            <span class="poster-number">
-                ${movie.id}
-            </span>
+    // Optional trailer action button if a trailer file was uploaded
+    const trailerHtml = movie.trailer_filename
+        ? `<button class="trailer-preview-btn" onclick="openTrailerModal('${uploadUrl(movie.trailer_filename)}')">
+               ▶ Watch Trailer
+           </button>`
+        : '';
 
-            <div class="poster-icon">
-                🎬
-            </div>
-
-            <span class="poster-year">
-                ${movie.year}
-            </span>
+    card.innerHTML = `
+        <div class="movie-poster-container">
+            <span class="poster-number">#${movie.id}</span>
+            ${posterHtml}
+            <span class="poster-year">${movie.year}</span>
         </div>
 
         <div class="movie-info">
-
             <div class="movie-top">
-
-                <span class="genre-badge">
-                    ${escapeHTML(movie.genre)}
-                </span>
-
-                <span class="rating">
-                    ⭐ ${rating}
-                </span>
-
+                <span class="genre-badge">${escapeHTML(movie.genre)}</span>
+                <span class="rating">⭐ ${rating}</span>
             </div>
 
-            <h3>
-                ${escapeHTML(movie.title)}
-            </h3>
+            <h3>${escapeHTML(movie.title)}</h3>
+            <p class="director">Directed by <strong>${escapeHTML(movie.director)}</strong></p>
 
-            <p class="director">
-                Directed by
-                <strong>
-                    ${escapeHTML(movie.director)}
-                </strong>
-            </p>
-
-            <div class="movie-actions">
-
-                <button
-                    class="btn btn-small btn-outline edit-button"
-                    data-id="${movie.id}"
-                >
-                    Edit
-                </button>
-
-                <button
-                    class="btn btn-small btn-danger delete-button"
-                    data-id="${movie.id}"
-                >
-                    Delete
-                </button>
-
+            <div class="movie-footer-actions">
+                ${trailerHtml}
+                <div class="movie-actions">
+                    <button class="btn btn-small btn-outline edit-button" data-id="${movie.id}">
+                        Edit
+                    </button>
+                    <button class="btn btn-small btn-danger delete-button" data-id="${movie.id}">
+                        Delete
+                    </button>
+                </div>
             </div>
-
         </div>
     `;
 
-  return card;
+    return card;
 }
+
+/*
+=========================================================
+TRAILER MODAL HANDLERS
+=========================================================
+*/
+
+function openTrailerModal(trailerUrl, movieTitle = "Movie Trailer") {
+    const trailerModal = document.getElementById("trailerModal");
+    const videoPlayer = document.getElementById("trailerVideoPlayer");
+    const modalTitle = document.getElementById("trailerModalTitle");
+
+    if (!trailerModal || !videoPlayer) return;
+
+    modalTitle.textContent = movieTitle;
+    videoPlayer.src = trailerUrl;
+    
+    trailerModal.classList.remove("hidden");
+    
+    // Automatically play the trailer when opened
+    videoPlayer.play().catch(error => {
+        console.log("Autoplay blocked or prevented:", error);
+    });
+}
+
+function closeTrailerModal() {
+    const trailerModal = document.getElementById("trailerModal");
+    const videoPlayer = document.getElementById("trailerVideoPlayer");
+
+    if (!trailerModal || !videoPlayer) return;
+
+    // Pause and clear the source so audio stops playing in the background
+    videoPlayer.pause();
+    videoPlayer.src = "";
+
+    trailerModal.classList.add("hidden");
+}
+
+// Optional: Close trailer modal with the Escape key
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        closeTrailerModal();
+    }
+});
+
 
 /*
 =========================================================
@@ -239,13 +264,25 @@ SECURITY
 =========================================================
 */
 
+// function escapeHTML(value) {
+//   const div = document.createElement("div");
+
+//   div.textContent = value;
+
+//   return div.innerHTML;
+// }
+
+
 function escapeHTML(value) {
-  const div = document.createElement("div");
-
-  div.textContent = value;
-
-  return div.innerHTML;
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
 }
+
 
 /*
 =========================================================
@@ -384,6 +421,7 @@ CREATE / UPDATE MOVIE
 movieForm.addEventListener("submit", async function (event) {
   event.preventDefault();
 
+
   const movie = {
     title: document.getElementById("title").value.trim(),
 
@@ -396,6 +434,8 @@ movieForm.addEventListener("submit", async function (event) {
     rating: Number(document.getElementById("rating").value),
   };
 
+  const formData = new FormData(movieForm);
+
   const button = document.getElementById("saveMovieButton");
 
   try {
@@ -406,8 +446,7 @@ movieForm.addEventListener("submit", async function (event) {
     if (editingMovieId) {
       await apiRequest(`/movies/${editingMovieId}`, {
         method: "PUT",
-
-        body: JSON.stringify(movie),
+        body: formData,
       });
 
       showToast("Movie updated successfully");
@@ -415,7 +454,7 @@ movieForm.addEventListener("submit", async function (event) {
       await apiRequest("/movies", {
         method: "POST",
 
-        body: JSON.stringify(movie),
+        body: formData,
       });
 
       showToast("Movie added successfully");
